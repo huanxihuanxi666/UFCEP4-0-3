@@ -125,7 +125,7 @@
     <exclusiveGateway id="G_InfoComplete" name="Supporting Information Complete?"/>
     <sendTask id="T_RequestMissing" name="Request Missing Information"/>
     <receiveTask id="T_ReceiveMissing" name="Receive Missing Information"/>
-    <userTask id="T_ConsultReview" name="Consultant Clinical Review"/>
+    <userTask id="T_ConsultReview" name="Perform Consultant Review"/>
     <exclusiveGateway id="G_ReferralDecision" name="Referral Decision"/>
     <userTask id="T_AcceptReferral" name="Record Acceptance + Booking Requirements"/>
     <userTask id="T_RejectReferral" name="Record Rejection Reason"/>
@@ -157,7 +157,7 @@
     <exclusiveGateway id="G_Slot" name="Suitable Slot Available?"/>
     <userTask id="T_NoSlot" name="Highlight No Suitable Slot / Refer to Pathway Team"/>
     <exclusiveGateway id="G_UrgentReferral" name="Urgent Referral?"/>
-    <userTask id="T_UrgentCoord" name="Urgent Manual Coordination / Escalation"/>
+    <userTask id="T_UrgentCoord" name="Urgent Coordination / Escalation"/>
     <userTask id="T_ConfirmAppt" name="Confirm Appointment"/>
     <serviceTask id="T_SendApptLetter" name="Send Appointment Letter">
       <extensionElements>
