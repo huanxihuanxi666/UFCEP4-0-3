@@ -1,0 +1,67 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Speciality",
+      "type": "textfield",
+      "id": "Field_speciality",
+      "key": "speciality",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Appointment priority",
+      "type": "textfield",
+      "id": "Field_appointmentPriority",
+      "key": "appointmentPriority",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Preferred timeframe",
+      "type": "textfield",
+      "id": "Field_preferredTimeframe",
+      "key": "preferredTimeframe",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Simulated slot available",
+      "type": "checkbox",
+      "id": "Field_requestedSlotAvailable",
+      "key": "requestedSlotAvailable"
+    },
+    {
+      "label": "Requested appointment date",
+      "type": "datetime",
+      "subtype": "date",
+      "id": "Field_requestedAppointmentDate",
+      "key": "requestedAppointmentDate",
+      "dateLabel": "Date",
+      "timeLabel": "Time",
+      "validate": {
+        "required": false
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_AppointmentBooking",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.5.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.x"
+  },
+  "schemaVersion": 16
+}

@@ -1,0 +1,8 @@
+PASS appointment slot + two-week rule
+PASS no-slot route
+PASS payment success
+PASS payment confirmation-lost investigation
+PASS treatment resource unavailable
+PASS clinic-letter approval rule
+PASS refund processing
+PASSED=7/7

@@ -1,0 +1,58 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Contact outcome",
+      "type": "select",
+      "id": "Field_contactOutcome",
+      "key": "contactOutcome",
+      "values": [
+        {
+          "label": "Answered",
+          "value": "ANSWERED"
+        },
+        {
+          "label": "No answer",
+          "value": "NO_ANSWER"
+        },
+        {
+          "label": "Wrong number",
+          "value": "WRONG_NUMBER"
+        },
+        {
+          "label": "Reschedule requested",
+          "value": "RESCHEDULE"
+        }
+      ],
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Contact notes",
+      "type": "textarea",
+      "id": "Field_contactNotes",
+      "key": "contactNotes",
+      "validate": {
+        "required": false
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_PatientContact",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.5.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.x"
+  },
+  "schemaVersion": 16
+}

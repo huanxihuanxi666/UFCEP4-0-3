@@ -1,0 +1,90 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Consultation / diagnosis / clinical findings",
+      "type": "textarea",
+      "id": "Field_clinicLetterClinicalContent",
+      "key": "clinicLetterClinicalContent",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Treatment decisions and follow-up",
+      "type": "textarea",
+      "id": "Field_clinicLetterFollowUp",
+      "key": "clinicLetterFollowUp",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Intended recipients",
+      "type": "textfield",
+      "id": "Field_clinicLetterRecipients",
+      "key": "clinicLetterRecipients",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Clinical content approved",
+      "type": "checkbox",
+      "id": "Field_clinicLetterApproved",
+      "key": "clinicLetterApproved"
+    },
+    {
+      "label": "Completed within 7 days",
+      "type": "checkbox",
+      "id": "Field_clinicLetterWithin7Days",
+      "key": "clinicLetterWithin7Days"
+    },
+    {
+      "label": "Letter completed",
+      "type": "checkbox",
+      "id": "Field_clinicLetterCompleted",
+      "key": "clinicLetterCompleted"
+    },
+    {
+      "label": "Outstanding duration",
+      "type": "select",
+      "id": "Field_letterAgeBand",
+      "key": "letterAgeBand",
+      "values": [
+        {
+          "label": "7 days to 1 month",
+          "value": "7D_TO_1M"
+        },
+        {
+          "label": "Over 1 month",
+          "value": "OVER_1M"
+        },
+        {
+          "label": "Over 3 months",
+          "value": "OVER_3M"
+        }
+      ],
+      "validate": {
+        "required": false
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_ClinicLetter",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.5.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.x"
+  },
+  "schemaVersion": 16
+}

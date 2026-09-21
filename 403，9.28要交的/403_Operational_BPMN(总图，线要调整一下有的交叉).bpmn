@@ -1,0 +1,350 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_Hospital_Full" targetNamespace="http://example.org/hospital">
+  <collaboration id="Collaboration_Hospital">
+    <participant id="P_Referrer" name="Referring Organisation"/>
+    <participant id="P_Hospital" name="Hospital Patient Administration System" processRef="Process_Hospital"/>
+    <participant id="P_Scheduling" name="External Scheduling Service"/>
+    <participant id="P_Correspondence" name="External Correspondence Service"/>
+    <participant id="P_ClinicalServices" name="External Treatment / Laboratory / Imaging Services"/>
+    <participant id="P_Payment" name="External Payment Service Provider"/>
+    <messageFlow id="M_Referral" sourceRef="P_Referrer" targetRef="S_Referral" name="Referral"/>
+    <messageFlow id="M_MissingReq" sourceRef="T_RequestMissing" targetRef="P_Referrer" name="Request Missing Information"/>
+    <messageFlow id="M_MissingInfo" sourceRef="P_Referrer" targetRef="T_ReceiveMissing" name="Additional Information"/>
+    <messageFlow id="M_Slot" sourceRef="T_SearchSlot" targetRef="P_Scheduling" name="Scheduling Request"/>
+    <messageFlow id="M_ApptLetter" sourceRef="T_SendApptLetter" targetRef="P_Correspondence" name="Appointment Letter"/>
+    <messageFlow id="M_Resource" sourceRef="T_CheckResources" targetRef="P_ClinicalServices" name="Resource Availability"/>
+    <messageFlow id="M_Payment" sourceRef="T_PaymentRequest" targetRef="P_Payment" name="Payment Request"/>
+    <messageFlow id="M_Refund" sourceRef="T_Refund" targetRef="P_Payment" name="Refund Request"/>
+    <messageFlow id="M_ClinicLetter" sourceRef="T_DistributeLetter" targetRef="P_Correspondence" name="Clinic Letter"/>
+  </collaboration>
+  <process id="Process_Hospital" name="Hospital Patient Referral, Treatment and Administration - Integrated" isExecutable="true">
+    <laneSet id="LaneSet_Hospital">
+      <lane id="L_Secretary" name="Medical Secretary">
+        <flowNodeRef>S_Referral</flowNodeRef>
+        <flowNodeRef>T_RecordReferral</flowNodeRef>
+        <flowNodeRef>T_CheckReferral</flowNodeRef>
+        <flowNodeRef>G_InfoComplete</flowNodeRef>
+        <flowNodeRef>T_RequestMissing</flowNodeRef>
+        <flowNodeRef>T_ReceiveMissing</flowNodeRef>
+        <flowNodeRef>T_AdminLetter</flowNodeRef>
+        <flowNodeRef>T_DistributeLetter</flowNodeRef>
+      </lane>
+      <lane id="L_Consultant" name="Consultant / Clinical Team">
+        <flowNodeRef>T_ConsultReview</flowNodeRef>
+        <flowNodeRef>G_ReferralDecision</flowNodeRef>
+        <flowNodeRef>T_AcceptReferral</flowNodeRef>
+        <flowNodeRef>T_RejectReferral</flowNodeRef>
+        <flowNodeRef>T_RedirectReferral</flowNodeRef>
+        <flowNodeRef>T_RequestMoreClinical</flowNodeRef>
+        <flowNodeRef>E_Rejected</flowNodeRef>
+        <flowNodeRef>E_Redirected</flowNodeRef>
+        <flowNodeRef>EV_Attend</flowNodeRef>
+        <flowNodeRef>T_Assessment</flowNodeRef>
+        <flowNodeRef>G_Consent</flowNodeRef>
+        <flowNodeRef>T_Consent</flowNodeRef>
+        <flowNodeRef>T_TreatmentRequest</flowNodeRef>
+        <flowNodeRef>E_NoTreatment</flowNodeRef>
+        <flowNodeRef>T_TreatmentCycle</flowNodeRef>
+        <flowNodeRef>G_MoreCycles</flowNodeRef>
+        <flowNodeRef>T_BloodReview</flowNodeRef>
+        <flowNodeRef>G_Clinical</flowNodeRef>
+        <flowNodeRef>T_Delay</flowNodeRef>
+        <flowNodeRef>T_Modify</flowNodeRef>
+        <flowNodeRef>G_FinImpact</flowNodeRef>
+        <flowNodeRef>T_PrepareLetter</flowNodeRef>
+        <flowNodeRef>T_ApproveLetter</flowNodeRef>
+        <flowNodeRef>T_ClinicalEnquiry</flowNodeRef>
+        <flowNodeRef>G_UrgentEnquiry</flowNodeRef>
+        <flowNodeRef>T_UrgentClinical</flowNodeRef>
+      </lane>
+      <lane id="L_Outpatient" name="Outpatient Bookings Team">
+        <flowNodeRef>T_BookingRequest</flowNodeRef>
+        <flowNodeRef>T_SearchSlot</flowNodeRef>
+        <flowNodeRef>G_Slot</flowNodeRef>
+        <flowNodeRef>T_NoSlot</flowNodeRef>
+        <flowNodeRef>G_UrgentReferral</flowNodeRef>
+        <flowNodeRef>T_UrgentCoord</flowNodeRef>
+        <flowNodeRef>T_ConfirmAppt</flowNodeRef>
+        <flowNodeRef>T_SendApptLetter</flowNodeRef>
+        <flowNodeRef>G_TwoWeeks</flowNodeRef>
+        <flowNodeRef>T_CallPatient</flowNodeRef>
+        <flowNodeRef>G_CallOutcome</flowNodeRef>
+        <flowNodeRef>T_ContactOK</flowNodeRef>
+        <flowNodeRef>T_NoAnswer</flowNodeRef>
+        <flowNodeRef>T_WrongNumber</flowNodeRef>
+        <flowNodeRef>T_Reschedule</flowNodeRef>
+        <flowNodeRef>G_ApptDone</flowNodeRef>
+      </lane>
+      <lane id="L_Treatment" name="Treatment &amp; Chemotherapy Bookings Team">
+        <flowNodeRef>G_Authorised</flowNodeRef>
+        <flowNodeRef>T_ReturnUnauth</flowNodeRef>
+        <flowNodeRef>T_CheckResources</flowNodeRef>
+        <flowNodeRef>G_Resource</flowNodeRef>
+        <flowNodeRef>T_Pending</flowNodeRef>
+        <flowNodeRef>T_RetryResource</flowNodeRef>
+        <flowNodeRef>T_BookTreatment</flowNodeRef>
+      </lane>
+      <lane id="L_Finance" name="Finance Team">
+        <flowNodeRef>G_Funding</flowNodeRef>
+        <flowNodeRef>T_HospitalFunding</flowNodeRef>
+        <flowNodeRef>T_InsurerFunding</flowNodeRef>
+        <flowNodeRef>T_PaymentRequest</flowNodeRef>
+        <flowNodeRef>G_Payment</flowNodeRef>
+        <flowNodeRef>T_PaymentOK</flowNodeRef>
+        <flowNodeRef>T_PaymentRetry</flowNodeRef>
+        <flowNodeRef>T_InvestigatePayment</flowNodeRef>
+        <flowNodeRef>G_UrgentPay</flowNodeRef>
+        <flowNodeRef>T_PayOverride</flowNodeRef>
+        <flowNodeRef>G_FundingReady</flowNodeRef>
+        <flowNodeRef>T_FinReview</flowNodeRef>
+        <flowNodeRef>G_Refund</flowNodeRef>
+        <flowNodeRef>T_Refund</flowNodeRef>
+        <flowNodeRef>T_RefundResult</flowNodeRef>
+        <flowNodeRef>T_FinEnquiry</flowNodeRef>
+      </lane>
+      <lane id="L_Admin" name="Call Handling / CNS / Pathway Coordination / Administrative Management">
+        <flowNodeRef>G_Letter7</flowNodeRef>
+        <flowNodeRef>T_MonitorLetter</flowNodeRef>
+        <flowNodeRef>EV_Weekly</flowNodeRef>
+        <flowNodeRef>G_LetterAge</flowNodeRef>
+        <flowNodeRef>T_Reminder</flowNodeRef>
+        <flowNodeRef>T_Manager</flowNodeRef>
+        <flowNodeRef>T_Higher</flowNodeRef>
+        <flowNodeRef>G_LetterDone</flowNodeRef>
+        <flowNodeRef>E_Pathway</flowNodeRef>
+        <flowNodeRef>S_Enquiry</flowNodeRef>
+        <flowNodeRef>T_RecordEnquiry</flowNodeRef>
+        <flowNodeRef>G_Enquiry</flowNodeRef>
+        <flowNodeRef>T_AdminEnquiry</flowNodeRef>
+        <flowNodeRef>E_Enquiry</flowNodeRef>
+      </lane>
+    </laneSet>
+    <startEvent id="S_Referral" name="Referral Received"/>
+    <userTask id="T_RecordReferral" name="Record Referral &amp; Supporting Documents"/>
+    <userTask id="T_CheckReferral" name="Check Supporting Information"/>
+    <exclusiveGateway id="G_InfoComplete" name="Supporting Information Complete?"/>
+    <sendTask id="T_RequestMissing" name="Request Missing Information"/>
+    <receiveTask id="T_ReceiveMissing" name="Receive Missing Information"/>
+    <userTask id="T_ConsultReview" name="Consultant Clinical Review"/>
+    <exclusiveGateway id="G_ReferralDecision" name="Referral Decision"/>
+    <userTask id="T_AcceptReferral" name="Record Acceptance + Booking Requirements"/>
+    <userTask id="T_RejectReferral" name="Record Rejection Reason"/>
+    <userTask id="T_RedirectReferral" name="Record Redirect &amp; Target Service"/>
+    <userTask id="T_RequestMoreClinical" name="Request Further Clinical Information"/>
+    <endEvent id="E_Rejected" name="Referral Rejected"/>
+    <endEvent id="E_Redirected" name="Referral Redirected"/>
+    <sequenceFlow id="F_001" sourceRef="S_Referral" targetRef="T_RecordReferral"/>
+    <sequenceFlow id="F_002" sourceRef="T_RecordReferral" targetRef="T_CheckReferral"/>
+    <sequenceFlow id="F_003" sourceRef="T_CheckReferral" targetRef="G_InfoComplete"/>
+    <sequenceFlow id="F_004" sourceRef="G_InfoComplete" targetRef="T_RequestMissing" name="No"/>
+    <sequenceFlow id="F_005" sourceRef="T_RequestMissing" targetRef="T_ReceiveMissing"/>
+    <sequenceFlow id="F_006" sourceRef="T_ReceiveMissing" targetRef="T_CheckReferral" name="Re-check"/>
+    <sequenceFlow id="F_007" sourceRef="G_InfoComplete" targetRef="T_ConsultReview" name="Yes"/>
+    <sequenceFlow id="F_008" sourceRef="T_ConsultReview" targetRef="G_ReferralDecision"/>
+    <sequenceFlow id="F_009" sourceRef="G_ReferralDecision" targetRef="T_AcceptReferral" name="Accept"/>
+    <sequenceFlow id="F_010" sourceRef="G_ReferralDecision" targetRef="T_RejectReferral" name="Reject"/>
+    <sequenceFlow id="F_011" sourceRef="G_ReferralDecision" targetRef="T_RedirectReferral" name="Redirect"/>
+    <sequenceFlow id="F_012" sourceRef="G_ReferralDecision" targetRef="T_RequestMoreClinical" name="Further Information"/>
+    <sequenceFlow id="F_013" sourceRef="T_RequestMoreClinical" targetRef="T_ReceiveMissing"/>
+    <sequenceFlow id="F_014" sourceRef="T_RejectReferral" targetRef="E_Rejected"/>
+    <sequenceFlow id="F_015" sourceRef="T_RedirectReferral" targetRef="E_Redirected"/>
+    <userTask id="T_BookingRequest" name="Receive Accepted Referral / Booking Request"/>
+    <serviceTask id="T_SearchSlot" name="Search External Scheduling Service">
+      <extensionElements>
+        <zeebe:taskDefinition type="search-appointment-slot" retries="3"/>
+      </extensionElements>
+    </serviceTask>
+    <exclusiveGateway id="G_Slot" name="Suitable Slot Available?"/>
+    <userTask id="T_NoSlot" name="Highlight No Suitable Slot / Refer to Pathway Team"/>
+    <exclusiveGateway id="G_UrgentReferral" name="Urgent Referral?"/>
+    <userTask id="T_UrgentCoord" name="Urgent Manual Coordination / Escalation"/>
+    <userTask id="T_ConfirmAppt" name="Confirm Appointment"/>
+    <serviceTask id="T_SendApptLetter" name="Send Appointment Letter">
+      <extensionElements>
+        <zeebe:taskDefinition type="send-appointment-letter" retries="3"/>
+      </extensionElements>
+    </serviceTask>
+    <exclusiveGateway id="G_TwoWeeks" name="Appointment Within Two Weeks?"/>
+    <userTask id="T_CallPatient" name="Telephone Patient"/>
+    <exclusiveGateway id="G_CallOutcome" name="Telephone Outcome"/>
+    <userTask id="T_ContactOK" name="Record Successful Contact"/>
+    <userTask id="T_NoAnswer" name="Record No Answer"/>
+    <userTask id="T_WrongNumber" name="Record Wrong Number"/>
+    <userTask id="T_Reschedule" name="Record Reschedule Request"/>
+    <exclusiveGateway id="G_ApptDone" name="Appointment Communication Complete"/>
+    <intermediateCatchEvent id="EV_Attend" name="Patient Attends New Patient Appointment"/>
+    <sequenceFlow id="F_016" sourceRef="T_AcceptReferral" targetRef="T_BookingRequest"/>
+    <sequenceFlow id="F_017" sourceRef="T_BookingRequest" targetRef="T_SearchSlot"/>
+    <sequenceFlow id="F_018" sourceRef="T_SearchSlot" targetRef="G_Slot"/>
+    <sequenceFlow id="F_019" sourceRef="G_Slot" targetRef="T_ConfirmAppt" name="Yes"/>
+    <sequenceFlow id="F_020" sourceRef="G_Slot" targetRef="T_NoSlot" name="No"/>
+    <sequenceFlow id="F_021" sourceRef="T_NoSlot" targetRef="G_UrgentReferral"/>
+    <sequenceFlow id="F_022" sourceRef="G_UrgentReferral" targetRef="T_UrgentCoord" name="Yes"/>
+    <sequenceFlow id="F_023" sourceRef="G_UrgentReferral" targetRef="T_SearchSlot" name="No / Retry"/>
+    <sequenceFlow id="F_024" sourceRef="T_UrgentCoord" targetRef="T_SearchSlot"/>
+    <sequenceFlow id="F_025" sourceRef="T_ConfirmAppt" targetRef="T_SendApptLetter"/>
+    <sequenceFlow id="F_026" sourceRef="T_SendApptLetter" targetRef="G_TwoWeeks"/>
+    <sequenceFlow id="F_027" sourceRef="G_TwoWeeks" targetRef="T_CallPatient" name="Yes - ALSO telephone"/>
+    <sequenceFlow id="F_028" sourceRef="G_TwoWeeks" targetRef="G_ApptDone" name="No"/>
+    <sequenceFlow id="F_029" sourceRef="T_CallPatient" targetRef="G_CallOutcome"/>
+    <sequenceFlow id="F_030" sourceRef="G_CallOutcome" targetRef="T_ContactOK" name="Answered"/>
+    <sequenceFlow id="F_031" sourceRef="G_CallOutcome" targetRef="T_NoAnswer" name="No Answer"/>
+    <sequenceFlow id="F_032" sourceRef="G_CallOutcome" targetRef="T_WrongNumber" name="Wrong Number"/>
+    <sequenceFlow id="F_033" sourceRef="G_CallOutcome" targetRef="T_Reschedule" name="Reschedule"/>
+    <sequenceFlow id="F_034" sourceRef="T_ContactOK" targetRef="G_ApptDone"/>
+    <sequenceFlow id="F_035" sourceRef="T_NoAnswer" targetRef="G_ApptDone" name="Attempt Recorded"/>
+    <sequenceFlow id="F_036" sourceRef="T_WrongNumber" targetRef="G_ApptDone" name="Issue Recorded"/>
+    <sequenceFlow id="F_037" sourceRef="T_Reschedule" targetRef="T_SearchSlot"/>
+    <sequenceFlow id="F_038" sourceRef="G_ApptDone" targetRef="EV_Attend"/>
+    <userTask id="T_Assessment" name="Assess Patient / Diagnosis / Treatment Options"/>
+    <exclusiveGateway id="G_Consent" name="Patient Agrees to Treatment?"/>
+    <userTask id="T_Consent" name="Record Patient Consent"/>
+    <userTask id="T_TreatmentRequest" name="Create Authorised Treatment Booking Request"/>
+    <exclusiveGateway id="G_Authorised" name="Request Complete &amp; Authorised?"/>
+    <userTask id="T_ReturnUnauth" name="Return / Reject Unauthorised Request"/>
+    <serviceTask id="T_CheckResources" name="Check Treatment / Lab / Imaging Availability">
+      <extensionElements>
+        <zeebe:taskDefinition type="check-treatment-resource" retries="3"/>
+      </extensionElements>
+    </serviceTask>
+    <exclusiveGateway id="G_Resource" name="Resources Available?"/>
+    <userTask id="T_Pending" name="Keep Pending + Notify Team"/>
+    <userTask id="T_RetryResource" name="Record Retry Attempt"/>
+    <endEvent id="E_NoTreatment" name="No Treatment / Clinical Pathway Review"/>
+    <sequenceFlow id="F_039" sourceRef="EV_Attend" targetRef="T_Assessment"/>
+    <sequenceFlow id="F_040" sourceRef="T_Assessment" targetRef="G_Consent"/>
+    <sequenceFlow id="F_041" sourceRef="G_Consent" targetRef="T_Consent" name="Yes"/>
+    <sequenceFlow id="F_042" sourceRef="G_Consent" targetRef="E_NoTreatment" name="No"/>
+    <sequenceFlow id="F_043" sourceRef="T_Consent" targetRef="T_TreatmentRequest"/>
+    <sequenceFlow id="F_044" sourceRef="T_TreatmentRequest" targetRef="G_Authorised"/>
+    <sequenceFlow id="F_045" sourceRef="G_Authorised" targetRef="T_CheckResources" name="Yes"/>
+    <sequenceFlow id="F_046" sourceRef="G_Authorised" targetRef="T_ReturnUnauth" name="No"/>
+    <sequenceFlow id="F_047" sourceRef="T_ReturnUnauth" targetRef="T_TreatmentRequest" name="Correct / Re-authorise"/>
+    <sequenceFlow id="F_048" sourceRef="T_CheckResources" targetRef="G_Resource"/>
+    <sequenceFlow id="F_049" sourceRef="G_Resource" targetRef="T_Pending" name="No"/>
+    <sequenceFlow id="F_050" sourceRef="T_Pending" targetRef="T_RetryResource"/>
+    <sequenceFlow id="F_051" sourceRef="T_RetryResource" targetRef="T_CheckResources" name="Retry"/>
+    <exclusiveGateway id="G_Funding" name="Funding Type"/>
+    <userTask id="T_HospitalFunding" name="Record Hospital Funding / Exemption"/>
+    <userTask id="T_InsurerFunding" name="Record Funding Organisation, Ref, Amount, Limits"/>
+    <serviceTask id="T_PaymentRequest" name="Send Secure Payment Request">
+      <extensionElements>
+        <zeebe:taskDefinition type="process-payment" retries="3"/>
+      </extensionElements>
+    </serviceTask>
+    <exclusiveGateway id="G_Payment" name="Payment Status"/>
+    <userTask id="T_PaymentOK" name="Record Successful Payment"/>
+    <userTask id="T_PaymentRetry" name="Notify Declined / Cancelled / Incomplete; Allow Retry"/>
+    <userTask id="T_InvestigatePayment" name="Investigate Confirmation Loss / Possible Duplicate"/>
+    <exclusiveGateway id="G_UrgentPay" name="Urgent Treatment Despite Unconfirmed Payment?"/>
+    <userTask id="T_PayOverride" name="Record Clinical Override + Refer to Finance"/>
+    <exclusiveGateway id="G_FundingReady" name="Funding / Payment Ready"/>
+    <userTask id="T_BookTreatment" name="Arrange / Confirm Treatment Appointment"/>
+    <sequenceFlow id="F_052" sourceRef="G_Resource" targetRef="G_Funding" name="Yes"/>
+    <sequenceFlow id="F_053" sourceRef="G_Funding" targetRef="T_HospitalFunding" name="Hospital Funded / Exemption"/>
+    <sequenceFlow id="F_054" sourceRef="G_Funding" targetRef="T_InsurerFunding" name="Insurer / Funding Organisation"/>
+    <sequenceFlow id="F_055" sourceRef="G_Funding" targetRef="T_PaymentRequest" name="Patient Payment"/>
+    <sequenceFlow id="F_056" sourceRef="T_HospitalFunding" targetRef="G_FundingReady"/>
+    <sequenceFlow id="F_057" sourceRef="T_InsurerFunding" targetRef="G_FundingReady"/>
+    <sequenceFlow id="F_058" sourceRef="T_PaymentRequest" targetRef="G_Payment"/>
+    <sequenceFlow id="F_059" sourceRef="G_Payment" targetRef="T_PaymentOK" name="Successful"/>
+    <sequenceFlow id="F_060" sourceRef="G_Payment" targetRef="T_PaymentRetry" name="Declined / Cancelled / Incomplete"/>
+    <sequenceFlow id="F_061" sourceRef="G_Payment" targetRef="T_InvestigatePayment" name="Confirmation Lost / Duplicate Risk"/>
+    <sequenceFlow id="F_062" sourceRef="T_PaymentOK" targetRef="G_FundingReady"/>
+    <sequenceFlow id="F_063" sourceRef="T_PaymentRetry" targetRef="T_PaymentRequest" name="Retry"/>
+    <sequenceFlow id="F_064" sourceRef="T_InvestigatePayment" targetRef="G_UrgentPay"/>
+    <sequenceFlow id="F_065" sourceRef="G_UrgentPay" targetRef="T_PayOverride" name="Yes"/>
+    <sequenceFlow id="F_066" sourceRef="G_UrgentPay" targetRef="T_InvestigatePayment" name="No - Continue Investigation"/>
+    <sequenceFlow id="F_067" sourceRef="T_PayOverride" targetRef="G_FundingReady"/>
+    <sequenceFlow id="F_068" sourceRef="G_FundingReady" targetRef="T_BookTreatment"/>
+    <userTask id="T_TreatmentCycle" name="Deliver Treatment / Chemotherapy Cycle"/>
+    <exclusiveGateway id="G_MoreCycles" name="More Treatment Cycles Required?"/>
+    <userTask id="T_BloodReview" name="Blood Test + Clinical Review"/>
+    <exclusiveGateway id="G_Clinical" name="Clinical Decision"/>
+    <userTask id="T_Delay" name="Authorise Treatment Delay"/>
+    <userTask id="T_Modify" name="Create Authorised Treatment Modification Request"/>
+    <exclusiveGateway id="G_FinImpact" name="Modification Affects Charge / Funding / Payment?"/>
+    <userTask id="T_FinReview" name="Review Financial Implications"/>
+    <exclusiveGateway id="G_Refund" name="Refund Required?"/>
+    <serviceTask id="T_Refund" name="Send Approved Refund Request">
+      <extensionElements>
+        <zeebe:taskDefinition type="process-refund" retries="3"/>
+      </extensionElements>
+    </serviceTask>
+    <userTask id="T_RefundResult" name="Record Refund Result"/>
+    <sequenceFlow id="F_069" sourceRef="T_BookTreatment" targetRef="T_TreatmentCycle"/>
+    <sequenceFlow id="F_070" sourceRef="T_TreatmentCycle" targetRef="G_MoreCycles"/>
+    <sequenceFlow id="F_071" sourceRef="G_MoreCycles" targetRef="T_BloodReview" name="Yes"/>
+    <sequenceFlow id="F_072" sourceRef="T_BloodReview" targetRef="G_Clinical"/>
+    <sequenceFlow id="F_073" sourceRef="G_Clinical" targetRef="T_TreatmentCycle" name="Continue"/>
+    <sequenceFlow id="F_074" sourceRef="G_Clinical" targetRef="T_Delay" name="Delay"/>
+    <sequenceFlow id="F_075" sourceRef="T_Delay" targetRef="T_BloodReview" name="Review Again"/>
+    <sequenceFlow id="F_076" sourceRef="G_Clinical" targetRef="T_Modify" name="Modify"/>
+    <sequenceFlow id="F_077" sourceRef="T_Modify" targetRef="G_FinImpact"/>
+    <sequenceFlow id="F_078" sourceRef="G_FinImpact" targetRef="T_BloodReview" name="No"/>
+    <sequenceFlow id="F_079" sourceRef="G_FinImpact" targetRef="T_FinReview" name="Yes"/>
+    <sequenceFlow id="F_080" sourceRef="T_FinReview" targetRef="G_Refund"/>
+    <sequenceFlow id="F_081" sourceRef="G_Refund" targetRef="T_Refund" name="Yes"/>
+    <sequenceFlow id="F_082" sourceRef="G_Refund" targetRef="T_BloodReview" name="No"/>
+    <sequenceFlow id="F_083" sourceRef="T_Refund" targetRef="T_RefundResult"/>
+    <sequenceFlow id="F_084" sourceRef="T_RefundResult" targetRef="T_BloodReview"/>
+    <userTask id="T_PrepareLetter" name="Prepare Clinic Letter"/>
+    <userTask id="T_ApproveLetter" name="Approve Clinical Content"/>
+    <userTask id="T_AdminLetter" name="Administrative Check + Confirm Recipients"/>
+    <serviceTask id="T_DistributeLetter" name="Distribute Clinic Letter">
+      <extensionElements>
+        <zeebe:taskDefinition type="send-clinic-letter" retries="3"/>
+      </extensionElements>
+    </serviceTask>
+    <exclusiveGateway id="G_Letter7" name="Completed / Sent Within 7 Days?"/>
+    <userTask id="T_MonitorLetter" name="Add Delayed Letter to Pathway Monitoring"/>
+    <intermediateCatchEvent id="EV_Weekly" name="Weekly Reminder Timer">
+      <timerEventDefinition>
+        <timeCycle>R/P7D</timeCycle>
+      </timerEventDefinition>
+    </intermediateCatchEvent>
+    <exclusiveGateway id="G_LetterAge" name="Outstanding Duration"/>
+    <userTask id="T_Reminder" name="Send Weekly Reminder to Consultant"/>
+    <userTask id="T_Manager" name="Escalate to Administrative Manager (&gt;1 month)"/>
+    <userTask id="T_Higher" name="Escalate to Higher Management (&gt;3 months)"/>
+    <exclusiveGateway id="G_LetterDone" name="Clinic Letter Completed?"/>
+    <endEvent id="E_Pathway" name="Patient Pathway Complete"/>
+    <sequenceFlow id="F_085" sourceRef="G_MoreCycles" targetRef="T_PrepareLetter" name="No"/>
+    <sequenceFlow id="F_086" sourceRef="T_PrepareLetter" targetRef="T_ApproveLetter"/>
+    <sequenceFlow id="F_087" sourceRef="T_ApproveLetter" targetRef="T_AdminLetter"/>
+    <sequenceFlow id="F_088" sourceRef="T_AdminLetter" targetRef="T_DistributeLetter"/>
+    <sequenceFlow id="F_089" sourceRef="T_DistributeLetter" targetRef="G_Letter7"/>
+    <sequenceFlow id="F_090" sourceRef="G_Letter7" targetRef="E_Pathway" name="Yes"/>
+    <sequenceFlow id="F_091" sourceRef="G_Letter7" targetRef="T_MonitorLetter" name="No"/>
+    <sequenceFlow id="F_092" sourceRef="T_MonitorLetter" targetRef="EV_Weekly"/>
+    <sequenceFlow id="F_093" sourceRef="EV_Weekly" targetRef="G_LetterAge"/>
+    <sequenceFlow id="F_094" sourceRef="G_LetterAge" targetRef="T_Reminder" name="7 days - 1 month"/>
+    <sequenceFlow id="F_095" sourceRef="G_LetterAge" targetRef="T_Manager" name="&gt;1 month"/>
+    <sequenceFlow id="F_096" sourceRef="G_LetterAge" targetRef="T_Higher" name="&gt;3 months"/>
+    <sequenceFlow id="F_097" sourceRef="T_Reminder" targetRef="G_LetterDone"/>
+    <sequenceFlow id="F_098" sourceRef="T_Manager" targetRef="G_LetterDone"/>
+    <sequenceFlow id="F_099" sourceRef="T_Higher" targetRef="G_LetterDone"/>
+    <sequenceFlow id="F_100" sourceRef="G_LetterDone" targetRef="E_Pathway" name="Yes - Stop reminders"/>
+    <sequenceFlow id="F_101" sourceRef="G_LetterDone" targetRef="EV_Weekly" name="No"/>
+    <startEvent id="S_Enquiry" name="Patient Enquiry Received"/>
+    <userTask id="T_RecordEnquiry" name="Record, Classify Priority &amp; Assign Team"/>
+    <exclusiveGateway id="G_Enquiry" name="Enquiry Type"/>
+    <userTask id="T_AdminEnquiry" name="Answer / Route Administrative Enquiry"/>
+    <userTask id="T_FinEnquiry" name="Route Financial Enquiry to Finance"/>
+    <userTask id="T_ClinicalEnquiry" name="Route Clinical Enquiry to CNS / Authorised Clinician"/>
+    <exclusiveGateway id="G_UrgentEnquiry" name="Urgent Clinical Concern?"/>
+    <userTask id="T_UrgentClinical" name="Highlight Immediately / Clinical Escalation"/>
+    <endEvent id="E_Enquiry" name="Enquiry Resolved"/>
+    <sequenceFlow id="F_102" sourceRef="S_Enquiry" targetRef="T_RecordEnquiry"/>
+    <sequenceFlow id="F_103" sourceRef="T_RecordEnquiry" targetRef="G_Enquiry"/>
+    <sequenceFlow id="F_104" sourceRef="G_Enquiry" targetRef="T_AdminEnquiry" name="Administrative"/>
+    <sequenceFlow id="F_105" sourceRef="G_Enquiry" targetRef="T_FinEnquiry" name="Financial"/>
+    <sequenceFlow id="F_106" sourceRef="G_Enquiry" targetRef="T_ClinicalEnquiry" name="Clinical"/>
+    <sequenceFlow id="F_107" sourceRef="T_AdminEnquiry" targetRef="E_Enquiry"/>
+    <sequenceFlow id="F_108" sourceRef="T_FinEnquiry" targetRef="E_Enquiry"/>
+    <sequenceFlow id="F_109" sourceRef="T_ClinicalEnquiry" targetRef="G_UrgentEnquiry"/>
+    <sequenceFlow id="F_110" sourceRef="G_UrgentEnquiry" targetRef="T_UrgentClinical" name="Yes"/>
+    <sequenceFlow id="F_111" sourceRef="G_UrgentEnquiry" targetRef="E_Enquiry" name="No"/>
+    <sequenceFlow id="F_112" sourceRef="T_UrgentClinical" targetRef="E_Enquiry"/>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Hospital_Better"><bpmndi:BPMNPlane id="BPMNPlane_Hospital_Better" bpmnElement="Collaboration_Hospital"><bpmndi:BPMNShape id="P_Referrer_di_better" bpmnElement="P_Referrer" isHorizontal="true"><dc:Bounds x="150" y="40" width="1870" height="90"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="P_Hospital_di_better" bpmnElement="P_Hospital" isHorizontal="false"><dc:Bounds x="150" y="180" width="1870" height="8000"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="P_Scheduling_di_better" bpmnElement="P_Scheduling" isHorizontal="false"><dc:Bounds x="2075" y="180" width="175" height="8000"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="P_Correspondence_di_better" bpmnElement="P_Correspondence" isHorizontal="false"><dc:Bounds x="2260" y="180" width="175" height="8000"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="P_ClinicalServices_di_better" bpmnElement="P_ClinicalServices" isHorizontal="false"><dc:Bounds x="2445" y="180" width="175" height="8000"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="P_Payment_di_better" bpmnElement="P_Payment" isHorizontal="false"><dc:Bounds x="2630" y="180" width="175" height="8000"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="L_Secretary_di_better" bpmnElement="L_Secretary" isHorizontal="false"><dc:Bounds x="185" y="180" width="300" height="8000"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="L_Consultant_di_better" bpmnElement="L_Consultant" isHorizontal="false"><dc:Bounds x="485" y="180" width="300" height="8000"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="L_Outpatient_di_better" bpmnElement="L_Outpatient" isHorizontal="false"><dc:Bounds x="785" y="180" width="300" height="8000"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="L_Treatment_di_better" bpmnElement="L_Treatment" isHorizontal="false"><dc:Bounds x="1085" y="180" width="300" height="8000"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="L_Finance_di_better" bpmnElement="L_Finance" isHorizontal="false"><dc:Bounds x="1385" y="180" width="300" height="8000"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="L_Admin_di_better" bpmnElement="L_Admin" isHorizontal="false"><dc:Bounds x="1685" y="180" width="300" height="8000"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="S_Referral_di_better" bpmnElement="S_Referral"><dc:Bounds x="317.0" y="300.0" width="36.0" height="36.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_RecordReferral_di_better" bpmnElement="T_RecordReferral"><dc:Bounds x="209.0" y="378.6" width="135.0" height="75.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_CheckReferral_di_better" bpmnElement="T_CheckReferral"><dc:Bounds x="209.0" y="555.5" width="135.0" height="75.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_InfoComplete_di_better" bpmnElement="G_InfoComplete"><dc:Bounds x="209.0" y="732.4" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_RequestMissing_di_better" bpmnElement="T_RequestMissing"><dc:Bounds x="262.5" y="830.7" width="145.0" height="60.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_ReceiveMissing_di_better" bpmnElement="T_ReceiveMissing"><dc:Bounds x="262.5" y="1007.6" width="145.0" height="60.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_ConsultReview_di_better" bpmnElement="T_ConsultReview"><dc:Bounds x="509.0" y="870.0" width="145.0" height="75.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_ReferralDecision_di_better" bpmnElement="G_ReferralDecision"><dc:Bounds x="509.0" y="1066.6" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_AcceptReferral_di_better" bpmnElement="T_AcceptReferral"><dc:Bounds x="509.0" y="1184.5" width="145.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_RejectReferral_di_better" bpmnElement="T_RejectReferral"><dc:Bounds x="567.5" y="1184.5" width="135.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_RedirectReferral_di_better" bpmnElement="T_RedirectReferral"><dc:Bounds x="567.5" y="1361.4" width="135.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_RequestMoreClinical_di_better" bpmnElement="T_RequestMoreClinical"><dc:Bounds x="509.0" y="1361.4" width="155.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="E_Rejected_di_better" bpmnElement="E_Rejected"><dc:Bounds x="617.0" y="1341.8" width="36.0" height="36.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="E_Redirected_di_better" bpmnElement="E_Redirected"><dc:Bounds x="617.0" y="1518.7" width="36.0" height="36.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_BookingRequest_di_better" bpmnElement="T_BookingRequest"><dc:Bounds x="809.0" y="1597.3" width="150.0" height="70.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_SearchSlot_di_better" bpmnElement="T_SearchSlot"><dc:Bounds x="809.0" y="1784.0" width="150.0" height="70.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_Slot_di_better" bpmnElement="G_Slot"><dc:Bounds x="809.0" y="1975.7" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_ConfirmAppt_di_better" bpmnElement="T_ConfirmAppt"><dc:Bounds x="809.0" y="2083.8" width="145.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_NoSlot_di_better" bpmnElement="T_NoSlot"><dc:Bounds x="862.5" y="2074.0" width="145.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_UrgentReferral_di_better" bpmnElement="G_UrgentReferral"><dc:Bounds x="910.0" y="2265.6" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_UrgentCoord_di_better" bpmnElement="T_UrgentCoord"><dc:Bounds x="860.0" y="2368.8" width="150.0" height="60.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_SendApptLetter_di_better" bpmnElement="T_SendApptLetter"><dc:Bounds x="809.0" y="2265.6" width="150.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_TwoWeeks_di_better" bpmnElement="G_TwoWeeks"><dc:Bounds x="809.0" y="2462.2" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_CallPatient_di_better" bpmnElement="T_CallPatient"><dc:Bounds x="809.0" y="2570.3" width="130.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_CallOutcome_di_better" bpmnElement="G_CallOutcome"><dc:Bounds x="809.0" y="2742.3" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_ContactOK_di_better" bpmnElement="T_ContactOK"><dc:Bounds x="809.0" y="2855.3" width="135.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_NoAnswer_di_better" bpmnElement="T_NoAnswer"><dc:Bounds x="867.5" y="2855.3" width="135.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_WrongNumber_di_better" bpmnElement="T_WrongNumber"><dc:Bounds x="867.5" y="3032.2" width="135.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_Reschedule_di_better" bpmnElement="T_Reschedule"><dc:Bounds x="809.0" y="3032.2" width="135.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_ApptDone_di_better" bpmnElement="G_ApptDone"><dc:Bounds x="809.0" y="3228.8" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="EV_Attend_di_better" bpmnElement="EV_Attend"><dc:Bounds x="617.0" y="3327.1" width="36.0" height="36.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_Assessment_di_better" bpmnElement="T_Assessment"><dc:Bounds x="509.0" y="3405.7" width="145.0" height="70.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_Consent_di_better" bpmnElement="G_Consent"><dc:Bounds x="509.0" y="3597.3" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_Consent_di_better" bpmnElement="T_Consent"><dc:Bounds x="509.0" y="3705.4" width="125.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="E_NoTreatment_di_better" bpmnElement="E_NoTreatment"><dc:Bounds x="617.0" y="3734.9" width="36.0" height="36.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_TreatmentRequest_di_better" bpmnElement="T_TreatmentRequest"><dc:Bounds x="509.0" y="3867.6" width="155.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_Authorised_di_better" bpmnElement="G_Authorised"><dc:Bounds x="1109.0" y="4029.8" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_ReturnUnauth_di_better" bpmnElement="T_ReturnUnauth"><dc:Bounds x="1157.5" y="4128.1" width="155.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_CheckResources_di_better" bpmnElement="T_CheckResources"><dc:Bounds x="1109.0" y="4162.5" width="155.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_Resource_di_better" bpmnElement="G_Resource"><dc:Bounds x="1109.0" y="4363.9" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_Pending_di_better" bpmnElement="T_Pending"><dc:Bounds x="1160.0" y="4462.2" width="150.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_RetryResource_di_better" bpmnElement="T_RetryResource"><dc:Bounds x="1167.5" y="4644.0" width="135.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_Funding_di_better" bpmnElement="G_Funding"><dc:Bounds x="1409.0" y="4486.8" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_HospitalFunding_di_better" bpmnElement="T_HospitalFunding"><dc:Bounds x="1409.0" y="4585.1" width="145.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_InsurerFunding_di_better" bpmnElement="T_InsurerFunding"><dc:Bounds x="1462.5" y="4585.1" width="145.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_PaymentRequest_di_better" bpmnElement="T_PaymentRequest"><dc:Bounds x="1409.0" y="4766.9" width="145.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_Payment_di_better" bpmnElement="G_Payment"><dc:Bounds x="1409.0" y="4953.6" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_PaymentOK_di_better" bpmnElement="T_PaymentOK"><dc:Bounds x="1409.0" y="5051.9" width="135.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_PaymentRetry_di_better" bpmnElement="T_PaymentRetry"><dc:Bounds x="1462.5" y="5051.9" width="145.0" height="52.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_InvestigatePayment_di_better" bpmnElement="T_InvestigatePayment"><dc:Bounds x="1409.0" y="5228.8" width="165.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_UrgentPay_di_better" bpmnElement="G_UrgentPay"><dc:Bounds x="1409.0" y="5440.1" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_PayOverride_di_better" bpmnElement="T_PayOverride"><dc:Bounds x="1409.0" y="5538.4" width="150.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_FundingReady_di_better" bpmnElement="G_FundingReady"><dc:Bounds x="1409.0" y="5725.1" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_BookTreatment_di_better" bpmnElement="T_BookTreatment"><dc:Bounds x="1109.0" y="5754.6" width="145.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_TreatmentCycle_di_better" bpmnElement="T_TreatmentCycle"><dc:Bounds x="509.0" y="5936.4" width="145.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_MoreCycles_di_better" bpmnElement="G_MoreCycles"><dc:Bounds x="509.0" y="6123.2" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_BloodReview_di_better" bpmnElement="T_BloodReview"><dc:Bounds x="509.0" y="6221.5" width="140.0" height="60.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_Clinical_di_better" bpmnElement="G_Clinical"><dc:Bounds x="509.0" y="6403.3" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_Delay_di_better" bpmnElement="T_Delay"><dc:Bounds x="567.5" y="6501.6" width="135.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_Modify_di_better" bpmnElement="T_Modify"><dc:Bounds x="509.0" y="6501.6" width="145.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_FinImpact_di_better" bpmnElement="G_FinImpact"><dc:Bounds x="509.0" y="6693.2" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_FinReview_di_better" bpmnElement="T_FinReview"><dc:Bounds x="1409.0" y="6688.3" width="145.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_Refund_di_better" bpmnElement="G_Refund"><dc:Bounds x="1409.0" y="6875.0" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_Refund_di_better" bpmnElement="T_Refund"><dc:Bounds x="1409.0" y="6973.3" width="140.0" height="60.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_RefundResult_di_better" bpmnElement="T_RefundResult"><dc:Bounds x="1409.0" y="7150.2" width="140.0" height="60.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_PrepareLetter_di_better" bpmnElement="T_PrepareLetter"><dc:Bounds x="509.0" y="6855.4" width="145.0" height="60.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_ApproveLetter_di_better" bpmnElement="T_ApproveLetter"><dc:Bounds x="509.0" y="7032.3" width="145.0" height="60.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_AdminLetter_di_better" bpmnElement="T_AdminLetter"><dc:Bounds x="209.0" y="7032.3" width="145.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_DistributeLetter_di_better" bpmnElement="T_DistributeLetter"><dc:Bounds x="209.0" y="7209.2" width="145.0" height="65.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_Letter7_di_better" bpmnElement="G_Letter7"><dc:Bounds x="1709.0" y="7391.0" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_MonitorLetter_di_better" bpmnElement="T_MonitorLetter"><dc:Bounds x="1709.0" y="7494.2" width="145.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="EV_Weekly_di_better" bpmnElement="EV_Weekly"><dc:Bounds x="1817.0" y="7528.6" width="36.0" height="36.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_LetterAge_di_better" bpmnElement="G_LetterAge"><dc:Bounds x="1709.0" y="7666.2" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_Reminder_di_better" bpmnElement="T_Reminder"><dc:Bounds x="1709.0" y="7769.4" width="120.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_Manager_di_better" bpmnElement="T_Manager"><dc:Bounds x="1770.0" y="7769.4" width="130.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_Higher_di_better" bpmnElement="T_Higher"><dc:Bounds x="1831.0" y="7769.4" width="130.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_LetterDone_di_better" bpmnElement="G_LetterDone"><dc:Bounds x="1709.0" y="7926.6" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="E_Pathway_di_better" bpmnElement="E_Pathway"><dc:Bounds x="1817.0" y="8020.0" width="36.0" height="36.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="S_Enquiry_di_better" bpmnElement="S_Enquiry"><dc:Bounds x="1817.0" y="300.0" width="36.0" height="36.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_RecordEnquiry_di_better" bpmnElement="T_RecordEnquiry"><dc:Bounds x="1709.0" y="378.6" width="145.0" height="70.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_Enquiry_di_better" bpmnElement="G_Enquiry"><dc:Bounds x="1709.0" y="565.4" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_AdminEnquiry_di_better" bpmnElement="T_AdminEnquiry"><dc:Bounds x="1709.0" y="673.5" width="145.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_FinEnquiry_di_better" bpmnElement="T_FinEnquiry"><dc:Bounds x="1462.5" y="673.5" width="145.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_ClinicalEnquiry_di_better" bpmnElement="T_ClinicalEnquiry"><dc:Bounds x="555.0" y="673.5" width="160.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="G_UrgentEnquiry_di_better" bpmnElement="G_UrgentEnquiry"><dc:Bounds x="610.0" y="879.9" width="50.0" height="50.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="T_UrgentClinical_di_better" bpmnElement="T_UrgentClinical"><dc:Bounds x="562.5" y="983.1" width="145.0" height="55.0"/></bpmndi:BPMNShape><bpmndi:BPMNShape id="E_Enquiry_di_better" bpmnElement="E_Enquiry"><dc:Bounds x="1817.0" y="1155.0" width="36.0" height="36.0"/></bpmndi:BPMNShape><bpmndi:BPMNEdge id="F_001_di_better" bpmnElement="F_001"><di:waypoint x="335.0" y="336.0"/><di:waypoint x="475.0" y="336.0"/><di:waypoint x="475.0" y="378.6"/><di:waypoint x="276.5" y="378.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_002_di_better" bpmnElement="F_002"><di:waypoint x="276.5" y="453.6"/><di:waypoint x="276.5" y="555.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_003_di_better" bpmnElement="F_003"><di:waypoint x="276.5" y="630.5"/><di:waypoint x="195.0" y="630.5"/><di:waypoint x="195.0" y="732.4"/><di:waypoint x="234.0" y="732.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_004_di_better" bpmnElement="F_004"><di:waypoint x="234.0" y="782.4"/><di:waypoint x="195.0" y="782.4"/><di:waypoint x="195.0" y="830.7"/><di:waypoint x="335.0" y="830.7"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_005_di_better" bpmnElement="F_005"><di:waypoint x="335.0" y="890.7"/><di:waypoint x="335.0" y="1007.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_006_di_better" bpmnElement="F_006"><di:waypoint x="335.0" y="1007.6"/><di:waypoint x="475.0" y="1007.6"/><di:waypoint x="475.0" y="630.5"/><di:waypoint x="276.5" y="630.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_007_di_better" bpmnElement="F_007"><di:waypoint x="234.0" y="782.4"/><di:waypoint x="234.0" y="826.2"/><di:waypoint x="581.5" y="826.2"/><di:waypoint x="581.5" y="870.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_008_di_better" bpmnElement="F_008"><di:waypoint x="581.5" y="945.0"/><di:waypoint x="495.0" y="945.0"/><di:waypoint x="495.0" y="1066.6"/><di:waypoint x="534.0" y="1066.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_009_di_better" bpmnElement="F_009"><di:waypoint x="534.0" y="1116.6"/><di:waypoint x="495.0" y="1116.6"/><di:waypoint x="495.0" y="1184.5"/><di:waypoint x="581.5" y="1184.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_010_di_better" bpmnElement="F_010"><di:waypoint x="534.0" y="1116.6"/><di:waypoint x="495.0" y="1116.6"/><di:waypoint x="495.0" y="1184.5"/><di:waypoint x="635.0" y="1184.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_011_di_better" bpmnElement="F_011"><di:waypoint x="534.0" y="1116.6"/><di:waypoint x="495.0" y="1116.6"/><di:waypoint x="495.0" y="1361.4"/><di:waypoint x="635.0" y="1361.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_012_di_better" bpmnElement="F_012"><di:waypoint x="534.0" y="1116.6"/><di:waypoint x="495.0" y="1116.6"/><di:waypoint x="495.0" y="1361.4"/><di:waypoint x="586.5" y="1361.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_013_di_better" bpmnElement="F_013"><di:waypoint x="586.5" y="1361.4"/><di:waypoint x="586.5" y="1214.5"/><di:waypoint x="335.0" y="1214.5"/><di:waypoint x="335.0" y="1067.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_014_di_better" bpmnElement="F_014"><di:waypoint x="635.0" y="1239.5"/><di:waypoint x="635.0" y="1341.8"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_015_di_better" bpmnElement="F_015"><di:waypoint x="635.0" y="1416.4"/><di:waypoint x="635.0" y="1518.7"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_016_di_better" bpmnElement="F_016"><di:waypoint x="581.5" y="1249.5"/><di:waypoint x="581.5" y="1423.4"/><di:waypoint x="884.0" y="1423.4"/><di:waypoint x="884.0" y="1597.3"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_017_di_better" bpmnElement="F_017"><di:waypoint x="884.0" y="1667.3"/><di:waypoint x="884.0" y="1784.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_018_di_better" bpmnElement="F_018"><di:waypoint x="884.0" y="1854.0"/><di:waypoint x="795.0" y="1854.0"/><di:waypoint x="795.0" y="1975.7"/><di:waypoint x="834.0" y="1975.7"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_019_di_better" bpmnElement="F_019"><di:waypoint x="834.0" y="2025.7"/><di:waypoint x="795.0" y="2025.7"/><di:waypoint x="795.0" y="2083.8"/><di:waypoint x="881.5" y="2083.8"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_020_di_better" bpmnElement="F_020"><di:waypoint x="834.0" y="2025.7"/><di:waypoint x="795.0" y="2025.7"/><di:waypoint x="795.0" y="2074.0"/><di:waypoint x="935.0" y="2074.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_021_di_better" bpmnElement="F_021"><di:waypoint x="935.0" y="2129.0"/><di:waypoint x="935.0" y="2265.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_022_di_better" bpmnElement="F_022"><di:waypoint x="935.0" y="2315.6"/><di:waypoint x="935.0" y="2368.8"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_023_di_better" bpmnElement="F_023"><di:waypoint x="935.0" y="2265.6"/><di:waypoint x="1075.0" y="2265.6"/><di:waypoint x="1075.0" y="1854.0"/><di:waypoint x="884.0" y="1854.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_024_di_better" bpmnElement="F_024"><di:waypoint x="935.0" y="2368.8"/><di:waypoint x="1075.0" y="2368.8"/><di:waypoint x="1075.0" y="1854.0"/><di:waypoint x="884.0" y="1854.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_025_di_better" bpmnElement="F_025"><di:waypoint x="881.5" y="2148.8"/><di:waypoint x="884.0" y="2265.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_026_di_better" bpmnElement="F_026"><di:waypoint x="884.0" y="2330.6"/><di:waypoint x="795.0" y="2330.6"/><di:waypoint x="795.0" y="2462.2"/><di:waypoint x="834.0" y="2462.2"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_027_di_better" bpmnElement="F_027"><di:waypoint x="834.0" y="2512.2"/><di:waypoint x="795.0" y="2512.2"/><di:waypoint x="795.0" y="2570.3"/><di:waypoint x="874.0" y="2570.3"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_028_di_better" bpmnElement="F_028"><di:waypoint x="834.0" y="2512.2"/><di:waypoint x="834.0" y="3228.8"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_029_di_better" bpmnElement="F_029"><di:waypoint x="874.0" y="2635.3"/><di:waypoint x="795.0" y="2635.3"/><di:waypoint x="795.0" y="2742.3"/><di:waypoint x="834.0" y="2742.3"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_030_di_better" bpmnElement="F_030"><di:waypoint x="834.0" y="2792.3"/><di:waypoint x="795.0" y="2792.3"/><di:waypoint x="795.0" y="2855.3"/><di:waypoint x="876.5" y="2855.3"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_031_di_better" bpmnElement="F_031"><di:waypoint x="834.0" y="2792.3"/><di:waypoint x="795.0" y="2792.3"/><di:waypoint x="795.0" y="2855.3"/><di:waypoint x="935.0" y="2855.3"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_032_di_better" bpmnElement="F_032"><di:waypoint x="834.0" y="2792.3"/><di:waypoint x="795.0" y="2792.3"/><di:waypoint x="795.0" y="3032.2"/><di:waypoint x="935.0" y="3032.2"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_033_di_better" bpmnElement="F_033"><di:waypoint x="834.0" y="2792.3"/><di:waypoint x="795.0" y="2792.3"/><di:waypoint x="795.0" y="3032.2"/><di:waypoint x="876.5" y="3032.2"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_034_di_better" bpmnElement="F_034"><di:waypoint x="876.5" y="2910.3"/><di:waypoint x="795.0" y="2910.3"/><di:waypoint x="795.0" y="3228.8"/><di:waypoint x="834.0" y="3228.8"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_035_di_better" bpmnElement="F_035"><di:waypoint x="935.0" y="2905.3"/><di:waypoint x="1075.0" y="2905.3"/><di:waypoint x="1075.0" y="3228.8"/><di:waypoint x="834.0" y="3228.8"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_036_di_better" bpmnElement="F_036"><di:waypoint x="935.0" y="3082.2"/><di:waypoint x="1075.0" y="3082.2"/><di:waypoint x="1075.0" y="3228.8"/><di:waypoint x="834.0" y="3228.8"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_037_di_better" bpmnElement="F_037"><di:waypoint x="876.5" y="3032.2"/><di:waypoint x="884.0" y="1854.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_038_di_better" bpmnElement="F_038"><di:waypoint x="834.0" y="3278.8"/><di:waypoint x="834.0" y="3382.1"/><di:waypoint x="635.0" y="3382.1"/><di:waypoint x="635.0" y="3327.1"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_039_di_better" bpmnElement="F_039"><di:waypoint x="635.0" y="3363.1"/><di:waypoint x="775.0" y="3363.1"/><di:waypoint x="775.0" y="3405.7"/><di:waypoint x="581.5" y="3405.7"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_040_di_better" bpmnElement="F_040"><di:waypoint x="581.5" y="3475.7"/><di:waypoint x="495.0" y="3475.7"/><di:waypoint x="495.0" y="3597.3"/><di:waypoint x="534.0" y="3597.3"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_041_di_better" bpmnElement="F_041"><di:waypoint x="534.0" y="3647.3"/><di:waypoint x="495.0" y="3647.3"/><di:waypoint x="495.0" y="3705.4"/><di:waypoint x="571.5" y="3705.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_042_di_better" bpmnElement="F_042"><di:waypoint x="534.0" y="3647.3"/><di:waypoint x="495.0" y="3647.3"/><di:waypoint x="495.0" y="3734.9"/><di:waypoint x="635.0" y="3734.9"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_043_di_better" bpmnElement="F_043"><di:waypoint x="571.5" y="3770.4"/><di:waypoint x="495.0" y="3770.4"/><di:waypoint x="495.0" y="3867.6"/><di:waypoint x="586.5" y="3867.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_044_di_better" bpmnElement="F_044"><di:waypoint x="586.5" y="3932.6"/><di:waypoint x="586.5" y="3981.2"/><di:waypoint x="1134.0" y="3981.2"/><di:waypoint x="1134.0" y="4029.8"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_045_di_better" bpmnElement="F_045"><di:waypoint x="1134.0" y="4079.8"/><di:waypoint x="1095.0" y="4079.8"/><di:waypoint x="1095.0" y="4162.5"/><di:waypoint x="1186.5" y="4162.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_046_di_better" bpmnElement="F_046"><di:waypoint x="1134.0" y="4079.8"/><di:waypoint x="1095.0" y="4079.8"/><di:waypoint x="1095.0" y="4128.1"/><di:waypoint x="1235.0" y="4128.1"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_047_di_better" bpmnElement="F_047"><di:waypoint x="1235.0" y="4128.1"/><di:waypoint x="1235.0" y="4030.3"/><di:waypoint x="586.5" y="4030.3"/><di:waypoint x="586.5" y="3932.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_048_di_better" bpmnElement="F_048"><di:waypoint x="1186.5" y="4227.5"/><di:waypoint x="1095.0" y="4227.5"/><di:waypoint x="1095.0" y="4363.9"/><di:waypoint x="1134.0" y="4363.9"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_049_di_better" bpmnElement="F_049"><di:waypoint x="1134.0" y="4413.9"/><di:waypoint x="1095.0" y="4413.9"/><di:waypoint x="1095.0" y="4462.2"/><di:waypoint x="1235.0" y="4462.2"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_050_di_better" bpmnElement="F_050"><di:waypoint x="1235.0" y="4517.2"/><di:waypoint x="1235.0" y="4644.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_051_di_better" bpmnElement="F_051"><di:waypoint x="1235.0" y="4644.0"/><di:waypoint x="1375.0" y="4644.0"/><di:waypoint x="1375.0" y="4227.5"/><di:waypoint x="1186.5" y="4227.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_052_di_better" bpmnElement="F_052"><di:waypoint x="1134.0" y="4413.9"/><di:waypoint x="1134.0" y="4541.8"/><di:waypoint x="1434.0" y="4541.8"/><di:waypoint x="1434.0" y="4486.8"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_053_di_better" bpmnElement="F_053"><di:waypoint x="1434.0" y="4536.8"/><di:waypoint x="1395.0" y="4536.8"/><di:waypoint x="1395.0" y="4585.1"/><di:waypoint x="1481.5" y="4585.1"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_054_di_better" bpmnElement="F_054"><di:waypoint x="1434.0" y="4536.8"/><di:waypoint x="1395.0" y="4536.8"/><di:waypoint x="1395.0" y="4585.1"/><di:waypoint x="1535.0" y="4585.1"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_055_di_better" bpmnElement="F_055"><di:waypoint x="1434.0" y="4536.8"/><di:waypoint x="1395.0" y="4536.8"/><di:waypoint x="1395.0" y="4766.9"/><di:waypoint x="1481.5" y="4766.9"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_056_di_better" bpmnElement="F_056"><di:waypoint x="1481.5" y="4640.1"/><di:waypoint x="1395.0" y="4640.1"/><di:waypoint x="1395.0" y="5725.1"/><di:waypoint x="1434.0" y="5725.1"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_057_di_better" bpmnElement="F_057"><di:waypoint x="1535.0" y="4640.1"/><di:waypoint x="1675.0" y="4640.1"/><di:waypoint x="1675.0" y="5725.1"/><di:waypoint x="1434.0" y="5725.1"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_058_di_better" bpmnElement="F_058"><di:waypoint x="1481.5" y="4821.9"/><di:waypoint x="1395.0" y="4821.9"/><di:waypoint x="1395.0" y="4953.6"/><di:waypoint x="1434.0" y="4953.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_059_di_better" bpmnElement="F_059"><di:waypoint x="1434.0" y="5003.6"/><di:waypoint x="1395.0" y="5003.6"/><di:waypoint x="1395.0" y="5051.9"/><di:waypoint x="1476.5" y="5051.9"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_060_di_better" bpmnElement="F_060"><di:waypoint x="1434.0" y="5003.6"/><di:waypoint x="1395.0" y="5003.6"/><di:waypoint x="1395.0" y="5051.9"/><di:waypoint x="1535.0" y="5051.9"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_061_di_better" bpmnElement="F_061"><di:waypoint x="1434.0" y="5003.6"/><di:waypoint x="1395.0" y="5003.6"/><di:waypoint x="1395.0" y="5228.8"/><di:waypoint x="1491.5" y="5228.8"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_062_di_better" bpmnElement="F_062"><di:waypoint x="1476.5" y="5101.9"/><di:waypoint x="1395.0" y="5101.9"/><di:waypoint x="1395.0" y="5725.1"/><di:waypoint x="1434.0" y="5725.1"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_063_di_better" bpmnElement="F_063"><di:waypoint x="1535.0" y="5051.9"/><di:waypoint x="1675.0" y="5051.9"/><di:waypoint x="1675.0" y="4821.9"/><di:waypoint x="1481.5" y="4821.9"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_064_di_better" bpmnElement="F_064"><di:waypoint x="1491.5" y="5283.8"/><di:waypoint x="1395.0" y="5283.8"/><di:waypoint x="1395.0" y="5440.1"/><di:waypoint x="1434.0" y="5440.1"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_065_di_better" bpmnElement="F_065"><di:waypoint x="1434.0" y="5490.1"/><di:waypoint x="1395.0" y="5490.1"/><di:waypoint x="1395.0" y="5538.4"/><di:waypoint x="1484.0" y="5538.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_066_di_better" bpmnElement="F_066"><di:waypoint x="1434.0" y="5440.1"/><di:waypoint x="1395.0" y="5440.1"/><di:waypoint x="1395.0" y="5283.8"/><di:waypoint x="1491.5" y="5283.8"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_067_di_better" bpmnElement="F_067"><di:waypoint x="1484.0" y="5593.4"/><di:waypoint x="1395.0" y="5593.4"/><di:waypoint x="1395.0" y="5725.1"/><di:waypoint x="1434.0" y="5725.1"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_068_di_better" bpmnElement="F_068"><di:waypoint x="1434.0" y="5775.1"/><di:waypoint x="1434.0" y="5830.1"/><di:waypoint x="1181.5" y="5830.1"/><di:waypoint x="1181.5" y="5754.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_069_di_better" bpmnElement="F_069"><di:waypoint x="1181.5" y="5819.6"/><di:waypoint x="1181.5" y="5878.0"/><di:waypoint x="581.5" y="5878.0"/><di:waypoint x="581.5" y="5936.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_070_di_better" bpmnElement="F_070"><di:waypoint x="581.5" y="6001.4"/><di:waypoint x="495.0" y="6001.4"/><di:waypoint x="495.0" y="6123.2"/><di:waypoint x="534.0" y="6123.2"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_071_di_better" bpmnElement="F_071"><di:waypoint x="534.0" y="6173.2"/><di:waypoint x="495.0" y="6173.2"/><di:waypoint x="495.0" y="6221.5"/><di:waypoint x="579.0" y="6221.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_072_di_better" bpmnElement="F_072"><di:waypoint x="579.0" y="6281.5"/><di:waypoint x="495.0" y="6281.5"/><di:waypoint x="495.0" y="6403.3"/><di:waypoint x="534.0" y="6403.3"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_073_di_better" bpmnElement="F_073"><di:waypoint x="534.0" y="6403.3"/><di:waypoint x="495.0" y="6403.3"/><di:waypoint x="495.0" y="6001.4"/><di:waypoint x="581.5" y="6001.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_074_di_better" bpmnElement="F_074"><di:waypoint x="534.0" y="6453.3"/><di:waypoint x="495.0" y="6453.3"/><di:waypoint x="495.0" y="6501.6"/><di:waypoint x="635.0" y="6501.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_075_di_better" bpmnElement="F_075"><di:waypoint x="635.0" y="6501.6"/><di:waypoint x="775.0" y="6501.6"/><di:waypoint x="775.0" y="6281.5"/><di:waypoint x="579.0" y="6281.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_076_di_better" bpmnElement="F_076"><di:waypoint x="534.0" y="6453.3"/><di:waypoint x="495.0" y="6453.3"/><di:waypoint x="495.0" y="6501.6"/><di:waypoint x="581.5" y="6501.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_077_di_better" bpmnElement="F_077"><di:waypoint x="581.5" y="6556.6"/><di:waypoint x="495.0" y="6556.6"/><di:waypoint x="495.0" y="6693.2"/><di:waypoint x="534.0" y="6693.2"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_078_di_better" bpmnElement="F_078"><di:waypoint x="534.0" y="6693.2"/><di:waypoint x="495.0" y="6693.2"/><di:waypoint x="495.0" y="6281.5"/><di:waypoint x="579.0" y="6281.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_079_di_better" bpmnElement="F_079"><di:waypoint x="534.0" y="6743.2"/><di:waypoint x="534.0" y="6798.2"/><di:waypoint x="1481.5" y="6798.2"/><di:waypoint x="1481.5" y="6688.3"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_080_di_better" bpmnElement="F_080"><di:waypoint x="1481.5" y="6753.3"/><di:waypoint x="1395.0" y="6753.3"/><di:waypoint x="1395.0" y="6875.0"/><di:waypoint x="1434.0" y="6875.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_081_di_better" bpmnElement="F_081"><di:waypoint x="1434.0" y="6925.0"/><di:waypoint x="1395.0" y="6925.0"/><di:waypoint x="1395.0" y="6973.3"/><di:waypoint x="1479.0" y="6973.3"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_082_di_better" bpmnElement="F_082"><di:waypoint x="1434.0" y="6875.0"/><di:waypoint x="1434.0" y="6578.2"/><di:waypoint x="579.0" y="6578.2"/><di:waypoint x="579.0" y="6281.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_083_di_better" bpmnElement="F_083"><di:waypoint x="1479.0" y="7033.3"/><di:waypoint x="1479.0" y="7150.2"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_084_di_better" bpmnElement="F_084"><di:waypoint x="1479.0" y="7150.2"/><di:waypoint x="1479.0" y="6715.8"/><di:waypoint x="579.0" y="6715.8"/><di:waypoint x="579.0" y="6281.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_085_di_better" bpmnElement="F_085"><di:waypoint x="534.0" y="6173.2"/><di:waypoint x="495.0" y="6173.2"/><di:waypoint x="495.0" y="6855.4"/><di:waypoint x="581.5" y="6855.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_086_di_better" bpmnElement="F_086"><di:waypoint x="581.5" y="6915.4"/><di:waypoint x="581.5" y="7032.3"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_087_di_better" bpmnElement="F_087"><di:waypoint x="581.5" y="7092.3"/><di:waypoint x="581.5" y="7147.3"/><di:waypoint x="281.5" y="7147.3"/><di:waypoint x="281.5" y="7032.3"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_088_di_better" bpmnElement="F_088"><di:waypoint x="281.5" y="7097.3"/><di:waypoint x="281.5" y="7209.2"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_089_di_better" bpmnElement="F_089"><di:waypoint x="281.5" y="7274.2"/><di:waypoint x="281.5" y="7332.6"/><di:waypoint x="1734.0" y="7332.6"/><di:waypoint x="1734.0" y="7391.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_090_di_better" bpmnElement="F_090"><di:waypoint x="1734.0" y="7441.0"/><di:waypoint x="1695.0" y="7441.0"/><di:waypoint x="1695.0" y="8020.0"/><di:waypoint x="1835.0" y="8020.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_091_di_better" bpmnElement="F_091"><di:waypoint x="1734.0" y="7441.0"/><di:waypoint x="1695.0" y="7441.0"/><di:waypoint x="1695.0" y="7494.2"/><di:waypoint x="1781.5" y="7494.2"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_092_di_better" bpmnElement="F_092"><di:waypoint x="1781.5" y="7549.2"/><di:waypoint x="1695.0" y="7549.2"/><di:waypoint x="1695.0" y="7528.6"/><di:waypoint x="1835.0" y="7528.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_093_di_better" bpmnElement="F_093"><di:waypoint x="1835.0" y="7564.6"/><di:waypoint x="1975.0" y="7564.6"/><di:waypoint x="1975.0" y="7666.2"/><di:waypoint x="1734.0" y="7666.2"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_094_di_better" bpmnElement="F_094"><di:waypoint x="1734.0" y="7716.2"/><di:waypoint x="1695.0" y="7716.2"/><di:waypoint x="1695.0" y="7769.4"/><di:waypoint x="1769.0" y="7769.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_095_di_better" bpmnElement="F_095"><di:waypoint x="1734.0" y="7716.2"/><di:waypoint x="1695.0" y="7716.2"/><di:waypoint x="1695.0" y="7769.4"/><di:waypoint x="1835.0" y="7769.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_096_di_better" bpmnElement="F_096"><di:waypoint x="1734.0" y="7716.2"/><di:waypoint x="1695.0" y="7716.2"/><di:waypoint x="1695.0" y="7769.4"/><di:waypoint x="1896.0" y="7769.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_097_di_better" bpmnElement="F_097"><di:waypoint x="1769.0" y="7819.4"/><di:waypoint x="1695.0" y="7819.4"/><di:waypoint x="1695.0" y="7926.6"/><di:waypoint x="1734.0" y="7926.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_098_di_better" bpmnElement="F_098"><di:waypoint x="1835.0" y="7819.4"/><di:waypoint x="1975.0" y="7819.4"/><di:waypoint x="1975.0" y="7926.6"/><di:waypoint x="1734.0" y="7926.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_099_di_better" bpmnElement="F_099"><di:waypoint x="1896.0" y="7819.4"/><di:waypoint x="1975.0" y="7819.4"/><di:waypoint x="1975.0" y="7926.6"/><di:waypoint x="1734.0" y="7926.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_100_di_better" bpmnElement="F_100"><di:waypoint x="1734.0" y="7976.6"/><di:waypoint x="1695.0" y="7976.6"/><di:waypoint x="1695.0" y="8020.0"/><di:waypoint x="1835.0" y="8020.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_101_di_better" bpmnElement="F_101"><di:waypoint x="1734.0" y="7926.6"/><di:waypoint x="1695.0" y="7926.6"/><di:waypoint x="1695.0" y="7564.6"/><di:waypoint x="1835.0" y="7564.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_102_di_better" bpmnElement="F_102"><di:waypoint x="1835.0" y="336.0"/><di:waypoint x="1975.0" y="336.0"/><di:waypoint x="1975.0" y="378.6"/><di:waypoint x="1781.5" y="378.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_103_di_better" bpmnElement="F_103"><di:waypoint x="1781.5" y="448.6"/><di:waypoint x="1695.0" y="448.6"/><di:waypoint x="1695.0" y="565.4"/><di:waypoint x="1734.0" y="565.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_104_di_better" bpmnElement="F_104"><di:waypoint x="1734.0" y="615.4"/><di:waypoint x="1695.0" y="615.4"/><di:waypoint x="1695.0" y="673.5"/><di:waypoint x="1781.5" y="673.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_105_di_better" bpmnElement="F_105"><di:waypoint x="1734.0" y="615.4"/><di:waypoint x="1734.0" y="728.5"/><di:waypoint x="1535.0" y="728.5"/><di:waypoint x="1535.0" y="673.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_106_di_better" bpmnElement="F_106"><di:waypoint x="1734.0" y="615.4"/><di:waypoint x="1734.0" y="728.5"/><di:waypoint x="635.0" y="728.5"/><di:waypoint x="635.0" y="673.5"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_107_di_better" bpmnElement="F_107"><di:waypoint x="1781.5" y="728.5"/><di:waypoint x="1695.0" y="728.5"/><di:waypoint x="1695.0" y="1155.0"/><di:waypoint x="1835.0" y="1155.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_108_di_better" bpmnElement="F_108"><di:waypoint x="1535.0" y="728.5"/><di:waypoint x="1535.0" y="941.8"/><di:waypoint x="1835.0" y="941.8"/><di:waypoint x="1835.0" y="1155.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_109_di_better" bpmnElement="F_109"><di:waypoint x="635.0" y="728.5"/><di:waypoint x="635.0" y="879.9"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_110_di_better" bpmnElement="F_110"><di:waypoint x="635.0" y="929.9"/><di:waypoint x="635.0" y="983.1"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_111_di_better" bpmnElement="F_111"><di:waypoint x="635.0" y="929.9"/><di:waypoint x="635.0" y="1042.5"/><di:waypoint x="1835.0" y="1042.5"/><di:waypoint x="1835.0" y="1155.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="F_112_di_better" bpmnElement="F_112"><di:waypoint x="635.0" y="1038.1"/><di:waypoint x="635.0" y="1096.6"/><di:waypoint x="1835.0" y="1096.6"/><di:waypoint x="1835.0" y="1155.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="M_Referral_di_better" bpmnElement="M_Referral"><di:waypoint x="317.0" y="130.0"/><di:waypoint x="317.0" y="288.0"/><di:waypoint x="317.0" y="288.0"/><di:waypoint x="317.0" y="318.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="M_MissingReq_di_better" bpmnElement="M_MissingReq"><di:waypoint x="407.5" y="860.7"/><di:waypoint x="120.0" y="860.7"/><di:waypoint x="120.0" y="115.0"/><di:waypoint x="150.0" y="115.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="M_MissingInfo_di_better" bpmnElement="M_MissingInfo"><di:waypoint x="262.5" y="130.0"/><di:waypoint x="262.5" y="1007.6"/><di:waypoint x="262.5" y="1007.6"/><di:waypoint x="262.5" y="1037.6"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="M_Slot_di_better" bpmnElement="M_Slot"><di:waypoint x="959.0" y="1819.0"/><di:waypoint x="2045.0" y="1819.0"/><di:waypoint x="2045.0" y="1819.0"/><di:waypoint x="2075.0" y="1819.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="M_ApptLetter_di_better" bpmnElement="M_ApptLetter"><di:waypoint x="959.0" y="2298.1"/><di:waypoint x="2230.0" y="2298.1"/><di:waypoint x="2230.0" y="2298.1"/><di:waypoint x="2260.0" y="2298.1"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="M_Resource_di_better" bpmnElement="M_Resource"><di:waypoint x="1264.0" y="4195.0"/><di:waypoint x="2415.0" y="4195.0"/><di:waypoint x="2415.0" y="4195.0"/><di:waypoint x="2445.0" y="4195.0"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="M_Payment_di_better" bpmnElement="M_Payment"><di:waypoint x="1554.0" y="4794.4"/><di:waypoint x="2600.0" y="4794.4"/><di:waypoint x="2600.0" y="4794.4"/><di:waypoint x="2630.0" y="4794.4"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="M_Refund_di_better" bpmnElement="M_Refund"><di:waypoint x="1549.0" y="7003.3"/><di:waypoint x="2600.0" y="7003.3"/><di:waypoint x="2600.0" y="7003.3"/><di:waypoint x="2630.0" y="7003.3"/></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="M_ClinicLetter_di_better" bpmnElement="M_ClinicLetter"><di:waypoint x="354.0" y="7241.7"/><di:waypoint x="2230.0" y="7241.7"/><di:waypoint x="2230.0" y="7241.7"/><di:waypoint x="2260.0" y="7241.7"/></bpmndi:BPMNEdge></bpmndi:BPMNPlane></bpmndi:BPMNDiagram></definitions>

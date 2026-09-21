@@ -1,0 +1,9 @@
+PASS BPMN XML parses and process isExecutable=true
+PASS service-task job types: search-appointment-slot, send-appointment-letter, check-treatment-resource, process-payment, process-refund, send-clinic-letter
+PASS all 6 expected external-worker job types are bound
+PASS 10 user-task form bindings found
+PASS every BPMN formId has a matching editable .form file
+PASS 51 gateway condition expressions configured
+PASS critical process variables appear in gateway conditions
+PASS 9 form files are valid JSON
+STATIC_VALIDATION=PASS

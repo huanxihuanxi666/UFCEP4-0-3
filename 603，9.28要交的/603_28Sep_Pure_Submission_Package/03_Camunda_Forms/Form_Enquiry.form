@@ -1,0 +1,79 @@
+{
+  "components": [
+    {
+      "label": "Patient ID",
+      "type": "textfield",
+      "id": "Field_patientId",
+      "key": "patientId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Enquiry type",
+      "type": "select",
+      "id": "Field_enquiryType",
+      "key": "enquiryType",
+      "values": [
+        {
+          "label": "Administrative",
+          "value": "ADMINISTRATIVE"
+        },
+        {
+          "label": "Financial",
+          "value": "FINANCIAL"
+        },
+        {
+          "label": "Clinical",
+          "value": "CLINICAL"
+        }
+      ],
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Priority",
+      "type": "select",
+      "id": "Field_enquiryPriority",
+      "key": "enquiryPriority",
+      "values": [
+        {
+          "label": "Routine",
+          "value": "ROUTINE"
+        },
+        {
+          "label": "Urgent",
+          "value": "URGENT"
+        }
+      ],
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Urgent clinical concern",
+      "type": "checkbox",
+      "id": "Field_urgentClinicalConcern",
+      "key": "urgentClinicalConcern"
+    },
+    {
+      "label": "Enquiry details",
+      "type": "textarea",
+      "id": "Field_enquiryDetails",
+      "key": "enquiryDetails",
+      "validate": {
+        "required": true
+      }
+    }
+  ],
+  "type": "default",
+  "id": "Form_Enquiry",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.5.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.x"
+  },
+  "schemaVersion": 16
+}
